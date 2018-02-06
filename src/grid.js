@@ -4,11 +4,22 @@ import { G, Line } from 'react-native-svg'
 
 class Grid extends PureComponent {
 
-    render() {
+    componentDidMount() {
+        this.counter = -1;
+    }
 
+    _getIndex = () => {
+      this.counter += 1;
+      return this.counter;
+    }
+
+    render() {
+        this.componentDidMount()
         const {
                   ticks,
                   y,
+                  height,
+                  ticksColor,
                   gridProps,
               } = this.props
 
@@ -22,8 +33,8 @@ class Grid extends PureComponent {
                             x2={ '100%' }
                             y1={ y(tick) }
                             y2={ y(tick) }
-                            strokeWidth={ 1 }
-                            stroke={ 'rgba(0,0,0,0.2)' }
+                            strokeWidth={ height }
+                            stroke={ 'transparent' }    //ticksColor[this._getIndex()]
                             { ...gridProps }
                         />
                     ))
@@ -36,6 +47,8 @@ class Grid extends PureComponent {
 Grid.propTypes = {
     y: PropTypes.func.isRequired,
     ticks: PropTypes.array.isRequired,
+    height: PropTypes.number.isRequired,
+    ticksColor: PropTypes.arrayOf(PropTypes.string),
     gridProps: PropTypes.object,
 }
 

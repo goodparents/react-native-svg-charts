@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, Alert, Dimensions } from 'react-native'
 import * as scale from 'd3-scale'
 
 class XAxis extends PureComponent {
@@ -24,9 +24,11 @@ class XAxis extends PureComponent {
                   style,
                   values,
                   labelStyle,
+                  bgColor,
                   spacing,
                   chartType,
                   formatLabel,
+                  isFill,
                   contentInset: {
                       left  = 0,
                       right = 0,
@@ -42,6 +44,7 @@ class XAxis extends PureComponent {
         let labelWidth
         let x
         let transform
+        let spaces = [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
         const domain = [ 0, values.length - 1 ]
 
         switch (chartType) {
@@ -86,34 +89,41 @@ class XAxis extends PureComponent {
         return (
             <View style={ style }>
                 <View
-                    style={ { flexGrow: 1 } }
+                    style={ { top: ((Dimensions.get('window').width/375) * -20), height: 70, left: 0 , right: 0, } }
                     onLayout={ event => this._onLayout(event) }
+                    backgroundColor={ bgColor }
+                />
+                <View
+                    style={ { top: -70, height: 70, left: 0 , right: 0, } }
+                    onLayout={ event => this._onLayout(event) }
+                    backgroundColor={ 'transparent' }
                 >
                     {/*invisible text to allow for parent resizing*/}
                     <Text style={ [ labelStyle, { color: 'transparent' } ] }>
                         { formatLabel(values[ 0 ], 0) }
                     </Text>
                     {values.map((value, index) => {
-                        return (
-                            <Text
-                                numberOfLines={1}
-                                //'clip' not supported on android
-                                // ellipsizeMode={'clip'}
-                                key={`${value}-${index}`}
-                                style={[
-                                    styles.text,
-                                    labelStyle,
-                                    {
-                                        width: labelWidth,
-                                        position: 'absolute',
-                                        left: x(index),
-                                        transform,
-                                    },
-                                ]}
-                            >
-                                {formatLabel(value, index)}
-                            </Text>
-                        )
+                            return (
+                                <Text
+                                    numberOfLines={1}
+                                    //'clip' not supported on android
+                                    // ellipsizeMode={'clip'}
+                                    key={`${value}-${index}`}
+                                    style={[
+                                        styles.text,
+                                        (isFill && (index == 0 || index == values.length - 1)) ? { color: 'transparent' } : labelStyle,
+                                        {
+                                            width: labelWidth,
+                                            position: 'absolute',
+                                            transform,
+                                            backgroundColor: 'transparent',
+                                            left: x(index),
+                                        },
+                                    ]}
+                                >
+                                    {formatLabel(value, index)}
+                                </Text>
+                            )
                     })}
                 </View>
             </View>
@@ -129,9 +139,11 @@ XAxis.Type = {
 XAxis.propTypes = {
     values: PropTypes.array.isRequired,
     labelStyle: PropTypes.any,
+    bgColor: PropTypes.string,
     chartType: PropTypes.oneOf([ XAxis.Type.LINE, XAxis.Type.BAR ]),
     spacing: PropTypes.number,
     formatLabel: PropTypes.func,
+    isFill: PropTypes.bool,
     contentInset: PropTypes.shape({
         left: PropTypes.number,
         right: PropTypes.number,
@@ -143,7 +155,10 @@ XAxis.defaultProps = {
     spacing: 0.05,
     chartType: XAxis.Type.LINE,
     contentInset: {},
+    bgColor: 'transparent',
     formatLabel: (value, index) => index,
+    isFill: false,
+    labelStyle: { color: 'white' },
 }
 
 const styles = StyleSheet.create({

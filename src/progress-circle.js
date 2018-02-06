@@ -21,6 +21,7 @@ class ProgressCircle extends PureComponent {
         const {
                   style,
                   progressColor,
+                  circleWidth,
                   startAngle,
                   endAngle,
                   animate,
@@ -46,7 +47,7 @@ class ProgressCircle extends PureComponent {
             {
                 key: 'rest',
                 value: 1 - progress,
-                color: '#ECECEC',
+                color: 'transparent',
             },
         ]
 
@@ -63,7 +64,7 @@ class ProgressCircle extends PureComponent {
                 ...slice,
                 path: shape.arc()
                     .outerRadius(outerDiameter / 2)  // Radius of the pie
-                    .innerRadius((outerDiameter / 2) - 5)  // Inner radius: to create a donut or pie
+                    .innerRadius((outerDiameter / 2) - circleWidth)  // Inner radius: to create a donut or pie
                     .startAngle(slice.startAngle)
                     .endAngle(slice.endAngle)
                     .cornerRadius(45)
@@ -104,6 +105,7 @@ ProgressCircle.propTypes = {
     progress: PropTypes.number.isRequired,
     style: PropTypes.any,
     progressColor: PropTypes.any,
+    circleWidth: PropTypes.number,
     startAngle: PropTypes.number,
     endAngle: PropTypes.number,
     animate: PropTypes.bool,
@@ -113,6 +115,7 @@ ProgressCircle.propTypes = {
 ProgressCircle.defaultProps = {
     progressColor: '#22B6B0',
     startAngle: 0,
+    circleWidth: 5,
     endAngle: Math.PI * 2,
 }
 

@@ -20,9 +20,10 @@ class BarChart extends PureComponent {
         this.setState({ height, width })
     }
 
-    _getBar(value, x, y, barIndex, valueIndex, barWidth) {
+    _getBar(value, x, y, barIndex, valueIndex, barWidth, color) {
         return {
             value,
+            color,
             area: shape.area()
             // place the bar on the x-axis based on valueIndex + its index among the other bars in its group
                 .x((point, _index) =>
@@ -40,6 +41,7 @@ class BarChart extends PureComponent {
     render() {
         const {
                   data,
+                  yAxisValues,
                   dataPoints,
                   spacing,
                   animate,
@@ -48,6 +50,8 @@ class BarChart extends PureComponent {
                   showGrid,
                   renderGradient,
                   numberOfTicks,
+                  tickHeight,
+                  ticksColor,
                   contentInset: {
                       top    = 0,
                       bottom = 0,
@@ -82,8 +86,8 @@ class BarChart extends PureComponent {
 
         const values = array.merge(Object.values(data).map(obj => obj.values))
 
-        const extent = array.extent([ ...values, gridMax, gridMin ])
-        const ticks  = array.ticks(extent[ 0 ], extent[ 1 ], numberOfTicks)
+        const extent = [ Math.min(...yAxisValues), Math.max(...yAxisValues) ]  //array.extent([ ...values, gridMax, gridMin ])
+        const ticks  = yAxisValues   //array.ticks(extent[ 0 ], extent[ 1 ], numberOfTicks)
 
         //invert range to support svg coordinate system
         const y = scale.scaleLinear()
@@ -109,13 +113,16 @@ class BarChart extends PureComponent {
             const currentValues = Object.values(data)
                 .map(obj => obj.values[ i ])
 
+            const currentColors = Object.values(data)
+                .map(obj => obj.colors[ i ])
+
             //for each value calculate the bar area. The object index plays a big role
             currentValues.forEach((value, barIndex) => {
 
                 // eslint-disable-next-line no-unused-vars
                 const { values, positive, negative, ...other } = data[ barIndex ]
 
-                const bar = this._getBar(value, x, y, barIndex, i, barWidth)
+                const bar = this._getBar(value, x, y, barIndex, i, barWidth, currentColors[barIndex])
 
                 areas.push({
                     ...bar,
@@ -138,6 +145,8 @@ class BarChart extends PureComponent {
                             <Grid
                                 y={ y }
                                 ticks={ ticks }
+                                height={ tickHeight }
+                                ticksColor={ ticksColor }
                                 gridProps={ gridProps }
                             />
                         }
@@ -162,7 +171,7 @@ class BarChart extends PureComponent {
                                         </Defs>
                                         <Path
                                             { ...props }
-                                            fill={ renderGradient ? `url(#gradient-${index})` : props.fill }
+                                            fill={ renderGradient ? `url(#gradient-${index})` : bar.color }
                                             d={bar.area || null}
                                             animate={animate}
                                             animationDuration={animationDuration}
@@ -196,7 +205,9 @@ BarChart.propTypes = {
         strokeColorNegative: PropTypes.string,
         fillColorNegative: PropTypes.string,
         values: PropTypes.arrayOf(PropTypes.number).isRequired,
+        colors: PropTypes.arrayOf(PropTypes.string),
     })).isRequired,
+    yAxisValues: PropTypes.arrayOf(PropTypes.number).isRequired,
     style: PropTypes.any,
     renderGradient: PropTypes.func,
     spacing: PropTypes.number,
@@ -209,6 +220,8 @@ BarChart.propTypes = {
         bottom: PropTypes.number,
     }),
     numberOfTicks: PropTypes.number,
+    tickHeight: PropTypes.number,
+    ticksColor: PropTypes.arrayOf(PropTypes.string),
     showGrid: PropTypes.bool,
     gridMin: PropTypes.number,
     gridMax: PropTypes.number,

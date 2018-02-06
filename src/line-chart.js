@@ -36,11 +36,15 @@ class LineChart extends PureComponent {
 
         const {
                   dataPoints,
+                  yAxisValues,
                   style,
                   animate,
                   animationDuration,
                   showGrid,
                   numberOfTicks,
+                  tickHeight,
+                  ticksColor,
+                  curve,
                   contentInset: {
                       top    = 0,
                       bottom = 0,
@@ -65,8 +69,9 @@ class LineChart extends PureComponent {
             return <View style={ style }/>
         }
 
-        const extent = array.extent([ ...dataPoints, gridMax, gridMin, -shadowOffset ])
-        const ticks  = array.ticks(extent[ 0 ], extent[ 1 ], numberOfTicks)
+        // const extent = array.extent([ ...dataPoints, gridMax, gridMin, -shadowOffset ])
+        const extent = [ Math.min(...yAxisValues), Math.max(...yAxisValues) ]//array.extent([ ...dataPoints, Math.min(...dataPoints) ])
+        const ticks  = yAxisValues //array.ticks(extent[ 0 ], extent[ 1 ], numberOfTicks)
 
         //invert range to support svg coordinate system
         const y = scale.scaleLinear()
@@ -76,6 +81,17 @@ class LineChart extends PureComponent {
         const x = scale.scaleLinear()
             .domain([ 0, dataPoints.length - 1 ])
             .range([ left, width - right ])
+
+        this.y = y
+        this.x = x
+
+        const area = shape.area()
+            .x((d, index) => x(index))
+            .y0(y(0))
+            .y1(d => y(d))
+            .defined(value => typeof value === 'number')
+            .curve(curve)
+            (dataPoints)
 
         const line = this._createLine(
             dataPoints,
@@ -98,6 +114,8 @@ class LineChart extends PureComponent {
                             <Grid
                                 y={ y }
                                 ticks={ ticks }
+                                height={ tickHeight }
+                                ticksColor={ ticksColor }
                                 gridProps={ gridProps }
                             />
                         }
@@ -108,9 +126,9 @@ class LineChart extends PureComponent {
                         }
                         <Path
                             { ...svg }
-                            d={line}
+                            d={ svg.isFill ? area : line }
                             stroke={renderGradient ? 'url(#gradient)' : svg.stroke}
-                            fill={ 'none' }
+                            fill={ svg.isFill ? svg.fill : 'none' }
                             animate={animate}
                             animationDuration={animationDuration}
                         />
@@ -133,6 +151,7 @@ class LineChart extends PureComponent {
 
 LineChart.propTypes = {
     dataPoints: PropTypes.arrayOf(PropTypes.number).isRequired,
+    yAxisValues: PropTypes.arrayOf(PropTypes.number).isRequired,
     svg: PropTypes.object,
     shadowSvg: PropTypes.object,
     shadowWidth: PropTypes.number,
@@ -148,6 +167,8 @@ LineChart.propTypes = {
         bottom: PropTypes.number,
     }),
     numberOfTicks: PropTypes.number,
+    tickHeight: PropTypes.number,
+    ticksColor: PropTypes.arrayOf(PropTypes.string),
     showGrid: PropTypes.bool,
     gridMin: PropTypes.number,
     gridMax: PropTypes.number,
