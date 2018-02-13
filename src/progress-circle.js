@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import PropTypes from 'prop-types'
 import * as shape from 'd3-shape'
 import Path from './animated-path'
-import Svg, { G } from 'react-native-svg'
+import Svg, { Defs, Stop, G, LinearGradient } from 'react-native-svg'
 
 class ProgressCircle extends PureComponent {
 
@@ -21,9 +21,13 @@ class ProgressCircle extends PureComponent {
         const {
                   style,
                   progressColor,
+                  circleWidth,
                   startAngle,
                   endAngle,
                   animate,
+                  isGradient,
+                  gradientStart,
+                  gradientEnd,
                   animateDuration,
               } = this.props
 
@@ -46,7 +50,7 @@ class ProgressCircle extends PureComponent {
             {
                 key: 'rest',
                 value: 1 - progress,
-                color: '#ECECEC',
+                color: 'transparent',
             },
         ]
 
@@ -63,7 +67,7 @@ class ProgressCircle extends PureComponent {
                 ...slice,
                 path: shape.arc()
                     .outerRadius(outerDiameter / 2)  // Radius of the pie
-                    .innerRadius((outerDiameter / 2) - 5)  // Inner radius: to create a donut or pie
+                    .innerRadius((outerDiameter / 2) - circleWidth)  // Inner radius: to create a donut or pie
                     .startAngle(slice.startAngle)
                     .endAngle(slice.endAngle)
                     .cornerRadius(45)
@@ -77,6 +81,28 @@ class ProgressCircle extends PureComponent {
                 onLayout={event => this._onLayout(event)}
             >
                 <Svg style={{ flex: 1 }}>
+                    <Defs>
+                      { // Gradient color for Gauge.
+                        pieSlices.map((slice, index) => {
+                          if(index == 0) {
+                            return(
+                              <LinearGradient
+                                id={'gradient' + index}
+                                key={'gradient' + index}
+                                x1={0}
+                                y1={0}
+                                x2={110}
+                                y2={0}
+                              >
+                                <Stop offset="0%" stopColor={isGradient ? gradientStart : progressColor} />
+                                <Stop offset="100%" stopColor={isGradient ? gradientEnd : progressColor} />
+                              </LinearGradient>
+                            )
+                          }
+                        })
+                      // =======================
+                    }
+                    </Defs>
                     <G
                         x={width / 2}
                         y={height / 2}
@@ -85,7 +111,7 @@ class ProgressCircle extends PureComponent {
                             return (
                                 <Path
                                     key={index}
-                                    fill={shape.color}
+                                    fill={'url(#gradient' + index + ')'}
                                     d={shape.path}
                                     onPress={() => console.log(shape)}
                                     animate={animate}
@@ -104,16 +130,22 @@ ProgressCircle.propTypes = {
     progress: PropTypes.number.isRequired,
     style: PropTypes.any,
     progressColor: PropTypes.any,
+    circleWidth: PropTypes.number,
     startAngle: PropTypes.number,
     endAngle: PropTypes.number,
     animate: PropTypes.bool,
     animateDuration: PropTypes.number,
+    isGradient: PropTypes.bool,
+    gradientStart: PropTypes.string,
+    gradientEnd: PropTypes.string,
 }
 
 ProgressCircle.defaultProps = {
     progressColor: '#22B6B0',
     startAngle: 0,
+    circleWidth: 5,
     endAngle: Math.PI * 2,
+    isGradient: false,
 }
 
 export default ProgressCircle
