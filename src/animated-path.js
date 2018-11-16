@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Path } from 'react-native-svg'
 import * as interpolate from 'd3-interpolate-path'
+import { PanResponder } from 'react-native'
 
 class AnimatedPath extends Component {
 

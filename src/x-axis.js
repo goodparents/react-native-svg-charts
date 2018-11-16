@@ -111,7 +111,7 @@ class XAxis extends PureComponent {
                                     key={`${value}-${index}`}
                                     style={[
                                         styles.text,
-                                        (isFill && (index == 0 || index == values.length - 1)) ? { color: 'transparent' } : labelStyle,
+                                        labelStyle,
                                         {
                                             width: labelWidth,
                                             position: 'absolute',
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     text: {
         backgroundColor: 'transparent',
         textAlign: 'center',
-        fontSize: 10,
+        fontSize: 8,
     },
 })
 

@@ -87,6 +87,7 @@ class YAxis extends PureComponent {
                                         height:labelHeight,
                                         left: isFill ? 5 : 0,
                                         textAlign: isFill ? 'left' : 'center',
+                                        lineHeight: labelHeight,
                                     },
                                 ]}
                             >
