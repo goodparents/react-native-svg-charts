@@ -4,7 +4,7 @@ import * as shape from 'd3-shape'
 import PropTypes from 'prop-types'
 import React, { PureComponent } from 'react'
 import { View } from 'react-native'
-import Svg, { Defs, G } from 'react-native-svg'
+import Svg, { Defs, G, ClipPath, Rect } from 'react-native-svg'
 import Path from './animated-path'
 import Grid from './grid'
 
@@ -40,31 +40,34 @@ class BarChart extends PureComponent {
 
     render() {
         const {
-                  data,
-                  yAxisValues,
-                  dataPoints,
-                  spacing,
-                  animate,
-                  animationDuration,
-                  style,
-                  showGrid,
-                  renderGradient,
-                  numberOfTicks,
-                  tickHeight,
-                  ticksColor,
-                  contentInset: {
-                      top    = 0,
-                      bottom = 0,
-                      left   = 0,
-                      right  = 0,
-                  },
-                  gridMax,
-                  gridMin,
-                  gridProps,
-                  extras,
-                  renderExtra,
-                  renderDecorator,
-              } = this.props
+            data,
+            yAxisValues,
+            dataPoints,
+            spacing,
+            animate,
+            animationDuration,
+            style,
+            showGrid,
+            renderGradient,
+            numberOfTicks,
+            tickHeight,
+            ticksColor,
+            contentInset: {
+                top    = 0,
+                bottom = 0,
+                left   = 0,
+                right  = 0,
+            },
+            gridMax,
+            gridMin,
+            gridProps,
+            extras,
+            renderExtra,
+            renderDecorator,
+            isFillTop,
+            maximumValue,
+            maximumColor,
+        } = this.props
 
         if (!data && dataPoints) {
             throw `"dataPoints" have been renamed to "data" to better reflect the fact that it's an array of  objects`
@@ -141,16 +144,6 @@ class BarChart extends PureComponent {
                 >
                     <Svg style={{ flex: 1 }}>
                         {
-                            showGrid &&
-                            <Grid
-                                y={ y }
-                                ticks={ ticks }
-                                height={ tickHeight }
-                                ticksColor={ ticksColor }
-                                gridProps={ gridProps }
-                            />
-                        }
-                        {
                             areas.map((bar, index) => {
                                 if (!bar.area) {
                                     return null
@@ -169,6 +162,13 @@ class BarChart extends PureComponent {
                                                 })
                                             }
                                         </Defs>
+                                        {
+                                            isFillTop && <Defs key={ 'clips' }>
+                                                            <ClipPath id={ 'clip-path-top' }>
+                                                                <Rect x={ '0' } y={ `${-(this.state.height-y(maximumValue))}` } width={ this.state.width } height={ '100%' }/>
+                                                            </ClipPath>
+                                                        </Defs>
+                                        }
                                         <Path
                                             { ...props }
                                             fill={ renderGradient ? `url(#gradient-${index})` : bar.color }
@@ -176,11 +176,30 @@ class BarChart extends PureComponent {
                                             animate={animate}
                                             animationDuration={animationDuration}
                                         />
+                                        {
+                                            isFillTop && <Path
+                                                            { ...props }
+                                                            d={bar.area || null}
+                                                            fill={ maximumColor }
+                                                            animate={animate}
+                                                            animationDuration={animationDuration}
+                                                            clipPath={'url(#clip-path-top)'}
+                                                        />
+                                        }
                                     </G>
                                 )
                             })
                         }
-
+                        {
+                            showGrid &&
+                            <Grid
+                                y={ y }
+                                ticks={ ticks }
+                                height={ tickHeight }
+                                ticksColor={ ticksColor }
+                                gridProps={ gridProps }
+                            />
+                        }
                         { data[ 0 ].values.map((value, index) => renderDecorator(
                             {
                                 value,
@@ -226,9 +245,13 @@ BarChart.propTypes = {
     gridMin: PropTypes.number,
     gridMax: PropTypes.number,
     gridProps: PropTypes.object,
+    temp: PropTypes.string,
     extras: PropTypes.array,
     renderExtra: PropTypes.func,
     renderDecorator: PropTypes.func,
+    isFillTop: PropTypes.bool,
+    maximumValue: PropTypes.number,
+    maximumColor: PropTypes.string,
 }
 
 BarChart.defaultProps = {

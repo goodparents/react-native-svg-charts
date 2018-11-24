@@ -94,34 +94,37 @@ class LineChart extends PureComponent {
     render() {
 
         const {
-                  dataPoints,
-                  yAxisValues,
-                  style,
-                  animate,
-                  animationDuration,
-                  showGrid,
-                  numberOfTicks,
-                  tickHeight,
-                  ticksColor,
-                  curve,
-                  contentInset: {
-                      top    = 0,
-                      bottom = 0,
-                      left   = 0,
-                      right  = 0,
-                  },
-                  gridMax,
-                  gridMin,
-                  renderDecorator,
-                  extras,
-                  renderExtra,
-                  shadowOffset,
-                  gridProps,
-                  svg,
-                  shadowSvg,
-                  renderGradient,
-                  renderDashLine
-              } = this.props
+            dataPoints,
+            yAxisValues,
+            style,
+            animate,
+            animationDuration,
+            showGrid,
+            numberOfTicks,
+            tickHeight,
+            ticksColor,
+            curve,
+            contentInset: {
+                top    = 0,
+                bottom = 0,
+                left   = 0,
+                right  = 0,
+            },
+            gridMax,
+            gridMin,
+            renderDecorator,
+            extras,
+            renderExtra,
+            shadowOffset,
+            gridProps,
+            svg,
+            shadowSvg,
+            renderGradient,
+            renderDashLine,
+            isFillTop,
+            maximumValue,
+            maximumColor,
+        } = this.props
 
         const { width, height } = this.state
 
@@ -152,14 +155,6 @@ class LineChart extends PureComponent {
             .defined(value => typeof value === 'number')
             .curve(curve)
             (dataPoints)
-
-        // const area1 = shape.area()
-        //     .x((d, index) => x(index))
-        //     .y0(y(120))
-        //     .y1(d => y(d))
-        //     .defined(value => typeof value === 'number')
-        //     .curve(curve)
-        //     ([120, 140, 123, 140, 135, 143])
 
         const line = this._createLine(
             dataPoints,
@@ -192,6 +187,16 @@ class LineChart extends PureComponent {
                                 { renderGradient && renderGradient({ id: 'gradient', width, height, x, y }) }
                             </Defs>
                         }
+                        {
+                            isFillTop && <Defs key={ 'clips' }>
+                                            <ClipPath id={ 'clip-path-top' }>
+                                                <Rect x={ '0' } y={ `${-(this.state.height-this.y(maximumValue))}` } width={ this.state.width } height={ '100%' }/>
+                                            </ClipPath>
+                                            <ClipPath id={ 'clip-path-bottom' }>
+                                                <Rect x={ '0' } y={ `${(this.y(80))}` } width={ this.state.width } height={ '100%' }/>
+                                            </ClipPath>
+                                        </Defs>
+                        }
                         <G>
                             <Path
                                 { ...svg }
@@ -200,16 +205,25 @@ class LineChart extends PureComponent {
                                 fill={ svg.isFill ? svg.fill : 'none' }
                                 animate={animate}
                                 animationDuration={animationDuration}
-                                clipPath={ 'url(#clip-path-1)' }
                             />
-                            {/* <Path
+                            { isFillTop && <Path
                                 { ...svg }
-                                d={ svg.isFill ? area1 : line }
-                                stroke={'transparent'}
-                                fill={ 'red' }
+                                d={ svg.isFill ? area : line }
+                                stroke={svg.stroke}
+                                fill={ maximumColor }
                                 animate={animate}
                                 animationDuration={animationDuration}
-                            /> */}
+                                clipPath={'url(#clip-path-top)'}
+                            /> }
+                            {/* { isFillTop && <Path
+                                { ...svg }
+                                d={ svg.isFill ? area : line }
+                                stroke={svg.stroke}
+                                fill={ 'yellow' }
+                                animate={animate}
+                                animationDuration={animationDuration}
+                                clipPath={'url(#clip-path-bottom)'}
+                            /> } */}
                             {/* <Path
                                 strokeWidth={ 5 }
                                 { ...shadowSvg }
@@ -231,10 +245,6 @@ class LineChart extends PureComponent {
 
 LineChart.propTypes = {
     dataPoints: PropTypes.arrayOf(PropTypes.number).isRequired,
-    maximumValues: PropTypes.arrayOf(PropTypes.number),
-    maximumColor: PropTypes.string,
-    minimumValues: PropTypes.arrayOf(PropTypes.number),
-    minimumColor: PropTypes.string,
     yAxisValues: PropTypes.arrayOf(PropTypes.number).isRequired,
     svg: PropTypes.object,
     shadowSvg: PropTypes.object,
@@ -263,6 +273,9 @@ LineChart.propTypes = {
     renderDashLine: PropTypes.func,
     renderGradient: PropTypes.func,
     renderTooltip: PropTypes.func,
+    isFillTop: PropTypes.bool,
+    maximumValue: PropTypes.number,
+    maximumColor: PropTypes.string,
     ...Constants.gridProps,
 }
 
@@ -279,6 +292,7 @@ LineChart.defaultProps = {
     gridMin: 0,
     gridMax: 0,
     extras: [],
+    isFillTop: false,
     ...Constants.gridDefaultProps,
     renderDecorator: () => {
     },
@@ -291,3 +305,4 @@ LineChart.defaultProps = {
 }
 
 export default LineChart
+

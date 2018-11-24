@@ -34,7 +34,7 @@ class Grid extends PureComponent {
                             y1={ y(tick) }
                             y2={ y(tick) }
                             strokeWidth={ height }
-                            stroke={ 'transparent' }    //ticksColor[this._getIndex()]
+                            stroke={ gridProps.backgroundColor }    //ticksColor[this._getIndex()]
                             { ...gridProps }
                         />
                     ))
