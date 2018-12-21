@@ -36,6 +36,7 @@ class BarChart extends PureComponent {
                   data,
                   keys,
                   colors,
+                  mixColors,
                   order,
                   offset,
                   spacing,
@@ -87,13 +88,11 @@ class BarChart extends PureComponent {
         const x = scale.scaleBand()
             .domain(data.map((_, index) => index))
             .range([ left, width - right ])
-            .paddingInner([ spacing ])
-            .paddingOuter([ spacing ])
 
         const areas = array.merge(series.map((serie, keyIndex) => {
             return serie.map((entry, entryIndex) => {
                 const path = shape.area()
-                    .x((d, _index) => _index === 0 ? x(entryIndex) : x(entryIndex) + x.bandwidth())
+                    .x((d, _index) => _index === 0 ? x(entryIndex) : x(entryIndex) - + x.bandwidth() - 0.15)
                     .y0(d => y(d[ 0 ]))
                     .y1(d => y(d[ 1 ]))
                     .defined(d => !isNaN(d[ 0 ]) && !isNaN(d[ 1 ]))
@@ -101,7 +100,7 @@ class BarChart extends PureComponent {
 
                 return {
                     path,
-                    color: colors[ keyIndex ],
+                    color: mixColors.length == 0 ? colors[keyIndex] :  mixColors[entryIndex][keyIndex],
                 }
             })
         }))
@@ -128,13 +127,13 @@ class BarChart extends PureComponent {
                                         <Defs>
                                             {
                                                 renderGradient && renderGradient({
-                                                    id: `gradient-${index}`,
+                                                    id: 'gradient',
                                                     ...bar,
                                                 })
                                             }
                                         </Defs>
                                         <Path
-                                            fill={ renderGradient ? `url(#gradient-${index})` : bar.color }
+                                            fill={ bar.color }
                                             d={ bar.path }
                                             animate={ animate }
                                             animationDuration={ animationDuration }
@@ -155,6 +154,7 @@ BarChart.propTypes = {
     data: PropTypes.arrayOf(PropTypes.object),
     keys: PropTypes.arrayOf(PropTypes.string).isRequired,
     colors: PropTypes.arrayOf(PropTypes.string).isRequired,
+    mixColors: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)),
     offset: PropTypes.func,
     order: PropTypes.func,
     style: PropTypes.any,

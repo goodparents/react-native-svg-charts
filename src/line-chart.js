@@ -193,7 +193,7 @@ class LineChart extends PureComponent {
                                                 <Rect x={ '0' } y={ `${-(this.state.height-this.y(maximumValue))}` } width={ this.state.width } height={ '100%' }/>
                                             </ClipPath>
                                             <ClipPath id={ 'clip-path-bottom' }>
-                                                <Rect x={ '0' } y={ `${(this.y(80))}` } width={ this.state.width } height={ '100%' }/>
+                                                <Rect x={ '0' } y={ `${this.y(0)}` } width={ this.state.width } height={ '100%' }/>
                                             </ClipPath>
                                         </Defs>
                         }
@@ -217,9 +217,9 @@ class LineChart extends PureComponent {
                             /> }
                             {/* { isFillTop && <Path
                                 { ...svg }
-                                d={ svg.isFill ? area : line }
-                                stroke={svg.stroke}
-                                fill={ 'yellow' }
+                                d={ line }
+                                stroke={'white'}
+                                fill={ 'white' }
                                 animate={animate}
                                 animationDuration={animationDuration}
                                 clipPath={'url(#clip-path-bottom)'}
@@ -237,6 +237,7 @@ class LineChart extends PureComponent {
                             { extras.map((item, index) => renderExtra({ x, y, item, index, width, height })) }
                         </G>
                     </Svg>
+                    {/* <View style={{position: 'relative', width: this.width, height: 10, backgroundColor: 'red'}}/> */}
                 </View>
             </View>
         )
