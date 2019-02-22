@@ -123,6 +123,7 @@ class LineChart extends PureComponent {
             renderDashLine,
             isFillTop,
             maximumValue,
+            minimumValue,
             maximumColor,
         } = this.props
 
@@ -189,23 +190,26 @@ class LineChart extends PureComponent {
                         }
                         {
                             isFillTop && <Defs key={ 'clips' }>
+                                            <ClipPath id={ 'clip-path-main' }>
+                                                <Rect x={ '0' } y={ `${-(this.state.height-this.y(minimumValue))}` } width={ this.state.width } height={ '100%' }/>
+                                            </ClipPath>
                                             <ClipPath id={ 'clip-path-top' }>
                                                 <Rect x={ '0' } y={ `${-(this.state.height-this.y(maximumValue))}` } width={ this.state.width } height={ '100%' }/>
                                             </ClipPath>
                                             <ClipPath id={ 'clip-path-bottom' }>
-                                                <Rect x={ '0' } y={ `${this.y(0)}` } width={ this.state.width } height={ '100%' }/>
+                                                <Rect x={ '0' } y={ '0' } width={ this.state.width } height={ (this.state.height-this.y(maximumValue)) }/>
                                             </ClipPath>
                                         </Defs>
                         }
                         <G>
-                            <Path
-                                { ...svg }
+                            { isFillTop && <Path
                                 d={ svg.isFill ? area : line }
-                                stroke={svg.stroke}
+                                stroke={ svg.isFill ? svg.fill : svg.stroke }
                                 fill={ svg.isFill ? svg.fill : 'none' }
                                 animate={animate}
                                 animationDuration={animationDuration}
-                            />
+                                clipPath={'url(#clip-path-bottom)'}
+                            /> }
                             { isFillTop && <Path
                                 { ...svg }
                                 d={ svg.isFill ? area : line }
@@ -215,6 +219,15 @@ class LineChart extends PureComponent {
                                 animationDuration={animationDuration}
                                 clipPath={'url(#clip-path-top)'}
                             /> }
+                            <Path
+                                { ...svg }
+                                d={ svg.isFill ? area : line }
+                                stroke={svg.stroke}
+                                fill={ 'none' }
+                                animate={animate}
+                                animationDuration={animationDuration}
+                                clipPath={'url(#clip-path-main)'}
+                            />
                             {/* { isFillTop && <Path
                                 { ...svg }
                                 d={ line }
@@ -276,6 +289,7 @@ LineChart.propTypes = {
     renderTooltip: PropTypes.func,
     isFillTop: PropTypes.bool,
     maximumValue: PropTypes.number,
+    minimumValue: PropTypes.number,
     maximumColor: PropTypes.string,
     ...Constants.gridProps,
 }
