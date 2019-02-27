@@ -58,7 +58,7 @@ class LineChart extends PureComponent {
 
                 // console.log('[MOVE] : index ==== ' + index + ' && total width ==== ' + this.state.width + ' && total count ==== ' + this.props.dataPoints.length);
                 console.log('[MOVE] : xValue ==== ' + xPos + ' && yValue ==== ' + yPos);
-                this.props.renderTooltip({x: xPos, y: yPos, value: val});
+                this.props.renderTooltip({x: xPos, y: yPos, index: index, value: val});
                 // console.log('[MOVE] : gs.moveX ==== ' + evt.nativeEvent.locationX + ' && gs.moveY ==== ' + evt.nativeEvent.locationY + '\n');
             },
             onPanResponderTerminationRequest: (evt, gestureState) => true,
