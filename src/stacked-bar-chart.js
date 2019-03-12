@@ -85,25 +85,55 @@ class BarChart extends PureComponent {
         // use index as domain identifier instead of value since
         // domain must be same length as number of bars
         // same value can occur at several places in data
-        const x = scale.scaleBand()
+        // const x = scale.scaleBand()
+        //     .domain(data.map((_, index) => index))
+        //     .range([ left, width - right - (data.length * 0.15)])
+
+        let areas, x;
+        
+        if(spacing > 0.0) {
+
+            x = scale.scaleBand()
             .domain(data.map((_, index) => index))
-            .range([ left, width - right ])
+            .range([ left, width - right - (data.length * 0.15)])
 
-        const areas = array.merge(series.map((serie, keyIndex) => {
-            return serie.map((entry, entryIndex) => {
-                const path = shape.area()
-                    .x((d, _index) => _index === 0 ? x(entryIndex) : x(entryIndex) - + x.bandwidth() - 0.15)
-                    .y0(d => y(d[ 0 ]))
-                    .y1(d => y(d[ 1 ]))
-                    .defined(d => !isNaN(d[ 0 ]) && !isNaN(d[ 1 ]))
-                    ([ entry, entry ])
+            areas = array.merge(series.map((serie, keyIndex) => {
+                return serie.map((entry, entryIndex) => {
+                    const path = shape.area()
+                        .x((d, _index) => _index === 0 ? x(entryIndex) : x(entryIndex) - x.bandwidth() + (x.bandwidth() * spacing))
+                        .y0(d => y(d[ 0 ]))
+                        .y1(d => y(d[ 1 ]))
+                        .defined(d => !isNaN(d[ 0 ]) && !isNaN(d[ 1 ]))
+                        ([ entry, entry ])
+    
+                    return {
+                        path,
+                        color: mixColors.length == 0 ? colors[keyIndex] :  mixColors[entryIndex][keyIndex],
+                    }
+                })
+            }))
+        }
+        else {
+            x = scale.scaleBand()
+            .domain(data.map((_, index) => index))
+            .range([ left, width - right])
 
-                return {
-                    path,
-                    color: mixColors.length == 0 ? colors[keyIndex] :  mixColors[entryIndex][keyIndex],
-                }
-            })
-        }))
+            areas = array.merge(series.map((serie, keyIndex) => {
+                return serie.map((entry, entryIndex) => {
+                    const path = shape.area()
+                        .x((d, _index) => _index === 0 ? x(entryIndex) : x(entryIndex) - + x.bandwidth() - 0.15)
+                        .y0(d => y(d[ 0 ]))
+                        .y1(d => y(d[ 1 ]))
+                        .defined(d => !isNaN(d[ 0 ]) && !isNaN(d[ 1 ]))
+                        ([ entry, entry ])
+    
+                    return {
+                        path,
+                        color: mixColors.length == 0 ? colors[keyIndex] :  mixColors[entryIndex][keyIndex],
+                    }
+                })
+            }))
+        }
 
         return (
             <View style={ style }>
@@ -179,7 +209,7 @@ BarChart.propTypes = {
 }
 
 BarChart.defaultProps = {
-    spacing: 0.05,
+    spacing: 0.0,
     offset: shape.stackOffsetNone,
     order: shape.stackOrderNone,
     width: 100,
