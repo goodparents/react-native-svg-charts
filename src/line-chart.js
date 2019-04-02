@@ -223,7 +223,7 @@ class LineChart extends PureComponent {
                                 { ...svg }
                                 d={ svg.isFill ? area : line }
                                 stroke={svg.stroke}
-                                fill={ 'none' }
+                                fill={ isFillTop ? 'none' : svg.fill }
                                 animate={animate}
                                 animationDuration={animationDuration}
                                 clipPath={'url(#clip-path-main)'}
