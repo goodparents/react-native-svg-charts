@@ -144,7 +144,7 @@ class LineChart extends PureComponent {
 
         const x = scale.scaleLinear()
             .domain([ 0, dataPoints.length - 1 ])
-            .range([ left, width - right ])
+            .range([ left, width - right - 0.5 ])
 
         this.y = y
         this.x = x
